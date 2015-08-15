@@ -8,7 +8,7 @@ DOWN=$'\033[B'
 # Log <type> <msg>
 #
 log() {
-  printf "  \033[36m%10s\033[0m : \033[0m%s\033[0m\n" $1 $2
+  printf "  \e[0;32m%10s\033[0m : \033[0m%s\033[0m\n" $1 $2
 }
 
 #
@@ -30,12 +30,12 @@ fullscreen_off() {
 }
 
 handle_sigint() {
-  leave_fullscreen
+  fullscreen_off
   exit $?
 }
 
 handle_sigtstp() {
-  leave_fullscreen
+  fullscreen_off
   kill -s SIGSTOP $$
 }
 
@@ -71,7 +71,7 @@ display_process_with_selected() {
   log "KillList" "$1"
   for process in $processList; do
     if test $i -eq $2; then
-      printf "  \033[36mo <$((i+1))>\033[0m $process\033[0m\n"
+      printf "  \e[0;32mo <$((i+1))>\033[0m $process\033[0m\n"
     else
       printf "    <$((i+1))>\033[90m $process\033[0m\n"
     fi
