@@ -58,27 +58,45 @@ show_cursor() {
 #
 
 process_list() {
-  ps aux | grep $1 | awk '{printf "[%s]%s--%s\n", $2, $1, $12}'
+  ps aux | grep $1 | awk '{printf "[%s]%s--%s ", $2, $1, $12}'
 }
 
 #
 # Display processes
 #
 display_process_with_selected() {
-  processList=$(process_list $1)
-  i=0
+  processList=($(process_list $1))
+  killPos=${#processList[@]}
+  exitPos=$((${#processList[@]}+1))
+  if test $2 -gt $exitPos; then
+    menuPosition=0
+  else
+    menuPosition=$2
+  fi
+
   echo
   log "KillList" "$1"
-  for process in $processList; do
-    if test $i -eq $2; then
-      printf "  \e[0;32mo <$((i+1))>\033[0m $process\033[0m\n"
+  log "Porcesses" "${#processList[@]}"
+  for process in ${!processList[@]}; do
+    if test $process -eq $menuPosition; then
+      printf "  \e[0;32mo <$process>\033[0m ${processList[$process]}\033[0m\n"
     else
-      printf "    <$((i+1))>\033[90m $process\033[0m\n"
+      printf "    <$process>\033[90m ${processList[$process]}\033[0m\n"
     fi
-    i=$((i+1))
   done
-  printf "   \033[90m Kill all\033[0m\n"
-  printf "   \033[90m exit\033[0m\n"
+
+  if test $menuPosition -eq $killPos; then
+    printf "   \e[0;32m Kill all\033[0m\n"
+  else
+    printf "   \033[90m Kill all\033[0m\n"
+  fi
+
+  if test $menuPosition -eq $exitPos; then
+    printf "   \e[0;32m exit\033[0m\n"
+  else
+    printf "   \033[90m exit\033[0m\n"
+  fi
+
   echo
 }
 
@@ -89,10 +107,9 @@ display_process_with_selected() {
 #@TODO - kill # process, kill all processes or exit
 activate_list_item() {
     clear
-    printf "Process List\n"
-    printf "$processList\n"
-    printf "position\n"
-    printf "$1\n"
+    printf "position %s \n" $1
+    printf "Item %s \n" ${processList[$1]}
+    printf "Length %s \n" ${#processList[@]}
 #    fullscreen_off
 }
 
@@ -103,6 +120,7 @@ activate_list_item() {
 display_list() {
     fullscreen_on
     position = 0
+    clear
     display_process_with_selected $1 0
 
     trap handle_sigint INT
