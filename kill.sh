@@ -54,7 +54,19 @@ show_cursor() {
 }
 
 #
-# Get process list
+# Kill all processes for with passed name
+#
+
+killall_by_name() {
+    ps aux | grep $1 | awk '{print $2}' |
+    while read pid
+     do
+      echo Killing $pid
+      kill -9 $pid
+    done
+}
+#
+# Get process list for nice print
 #
 
 process_list() {
@@ -62,10 +74,20 @@ process_list() {
 }
 
 #
+#Get list of process PIDs
+#
+
+pid_list() {
+    ps aux | grep $1 | awk '{print $2}'
+}
+
+
+#
 # Display processes
 #
 display_process_with_selected() {
   processList=($(process_list $1))
+  pidList=($(pid_list $1))
   killPos=${#processList[@]}
   exitPos=$((${#processList[@]}+1))
   if test $2 -gt $exitPos; then
@@ -104,13 +126,18 @@ display_process_with_selected() {
 # Do the list item action
 #
 
-#@TODO - kill # process, kill all processes or exit
 activate_list_item() {
     clear
-    printf "position %s \n" $1
-    printf "Item %s \n" ${processList[$1]}
-    printf "Length %s \n" ${#processList[@]}
-#    fullscreen_off
+    if test $1 -eq $killPos; then
+        printf "Killing all %s processes" $2
+        killall_by_name $2
+    elif test $1 -eq $exitPos; then
+        printf "Bye!"
+    else
+        printf "Killing: %s\n" ${processList[$1]}
+        kill -9 ${pidList[$1]}
+        printf "Bye!\n"
+    fi
 }
 
 #
@@ -120,12 +147,15 @@ activate_list_item() {
 display_list() {
     fullscreen_on
     position = 0
+    processList=($(process_list $1))
+    exitPos=$((${#processList[@]}+1))
     clear
     display_process_with_selected $1 0
 
     trap handle_sigint INT
     trap handle_sigtstp SIGTSTP
 #@TODO - add scrolling limits - make it able to select kill all and exit
+#@TODO - add cyclic scrolling up and down
     while true; do
         read -n 3 c
         case "$c" in
@@ -140,11 +170,14 @@ display_list() {
             display_process_with_selected $1 $position
             ;;
           *)
-            activate_list_item $position
-#            fullscreen_off
+            activate_list_item $position $1
             exit
             ;;
         esac
+
+        if test $position -eq $exitPos; then
+            position=-1
+        fi
       done
 
 }
