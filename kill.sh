@@ -96,6 +96,12 @@ display_process_with_selected() {
     menuPosition=$2
   fi
 
+  if test ${#processList[@]} -eq 0; then
+    printf "No process with with name %s...\n" $1
+    printf "Bye!\n"
+    exit
+  fi
+
   echo
   log "KillList" "$1"
   log "Porcesses" "${#processList[@]}"
@@ -154,8 +160,7 @@ display_list() {
 
     trap handle_sigint INT
     trap handle_sigtstp SIGTSTP
-#@TODO - add scrolling limits - make it able to select kill all and exit
-#@TODO - add cyclic scrolling up and down
+
     while true; do
         read -n 3 c
         case "$c" in
@@ -163,21 +168,23 @@ display_list() {
             clear
             position=$((position-1))
             display_process_with_selected $1 $position
+            if test $position -eq 0; then
+                position=$(($exitPos+1))
+            fi
             ;;
           $DOWN)
             clear
             position=$((position+1))
             display_process_with_selected $1 $position
+            if test $position -eq $exitPos; then
+                position=-1
+            fi
             ;;
           *)
             activate_list_item $position $1
             exit
             ;;
         esac
-
-        if test $position -eq $exitPos; then
-            position=-1
-        fi
       done
 
 }
