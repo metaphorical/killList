@@ -2,6 +2,7 @@
 
 UP=$'\033[A'
 DOWN=$'\033[B'
+PARENT_COMMAND="$(ps -o comm= $PPID)"
 
 
 #
@@ -70,7 +71,7 @@ killall_by_name() {
 #
 
 process_list() {
-  ps aux | grep $1 | awk '{printf "[%s]%s--%s ", $2, $1, $12}'
+  ps aux | grep $1 | grep -v 'grep' | grep -v 'kill.sh' | awk '{printf "[%s]%s--%s ", $2, $1, $12}'
 }
 
 #
@@ -78,7 +79,7 @@ process_list() {
 #
 
 pid_list() {
-    ps aux | grep $1 | awk '{print $2}'
+    ps aux | grep $1 | grep -v 'grep' | grep -v 'kill.sh' | awk '{print $2}'
 }
 
 
@@ -86,8 +87,8 @@ pid_list() {
 # Display processes
 #
 display_process_with_selected() {
-  processList=($(process_list $1))
-  pidList=($(pid_list $1))
+  processList=$3
+  pidList=$4
   killPos=${#processList[@]}
   exitPos=$((${#processList[@]}+1))
   if test $2 -gt $exitPos; then
@@ -135,7 +136,7 @@ display_process_with_selected() {
 activate_list_item() {
     clear
     if test $1 -eq $killPos; then
-        printf "Killing all %s processes" $2
+        printf "Killing all %s processes\n" $2
         killall_by_name $2
     elif test $1 -eq $exitPos; then
         printf "Bye!"
@@ -154,9 +155,10 @@ display_list() {
     fullscreen_on
     position = 0
     processList=($(process_list $1))
+    pidList=($(pid_list $1))
     exitPos=$((${#processList[@]}+1))
     clear
-    display_process_with_selected $1 0
+    display_process_with_selected $1 0 $processList $pidList
 
     trap handle_sigint INT
     trap handle_sigtstp SIGTSTP
@@ -167,7 +169,7 @@ display_list() {
           $UP)
             clear
             position=$((position-1))
-            display_process_with_selected $1 $position
+            display_process_with_selected $1 $position $processList $pidList
             if test $position -eq 0; then
                 position=$(($exitPos+1))
             fi
@@ -175,7 +177,7 @@ display_list() {
           $DOWN)
             clear
             position=$((position+1))
-            display_process_with_selected $1 $position
+            display_process_with_selected $1 $position $processList $pidList
             if test $position -eq $exitPos; then
                 position=-1
             fi
