@@ -191,5 +191,14 @@ display_list() {
       done
 
 }
-
-display_list $1
+if test $# -eq 0; then
+    printf "Please provide process name\n"
+else
+  while test $# -ne 0; do
+    case $1 in
+      -h|--help|-H) printf "Usage:\n kill-list <process name>\n" ;;
+      *) display_list $1 ;;
+    esac
+      shift
+    done
+fi
