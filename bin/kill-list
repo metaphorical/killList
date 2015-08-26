@@ -66,6 +66,7 @@ killall_by_name() {
       kill -9 $pid
     done
 }
+
 #
 # Get process list for nice print
 #
@@ -100,7 +101,6 @@ display_process_with_selected() {
   if test ${#processList[@]} -eq 0; then
     printf "No process with with name %s...\n" $1
     printf "Bye!\n"
-    exit
   fi
 
   echo
@@ -184,7 +184,8 @@ display_list() {
             ;;
           *)
             activate_list_item $position $1
-            exit
+            fullscreen_off
+            exit 1
             ;;
         esac
       done
