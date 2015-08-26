@@ -191,6 +191,4 @@ display_list() {
 
 }
 
-#display_process_with_selected $1 $2
-
 display_list $1

@@ -1,0 +1,25 @@
+{
+  "name": "kill-list",
+  "description": "list processes of given name and pick ones to kill",
+  "version": "0.1.0",
+  "author": "Rastko <rastko.vukasinovic@gmail.com>",
+  "homepage": "https://github.com/metaphorical/killList",
+  "bugs": "https://github.com/metaphorical/killList/issues",
+  "keywords": [
+    "kill",
+    "list",
+    "bash"
+  ],
+  "bin": {
+    "kill-list": "./bin/kill-list"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/metaphorical/killList"
+  },
+  "preferGlobal": true,
+  "os": [
+    "!win32"
+  ],
+  "license": "MIT"
+}
