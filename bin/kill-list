@@ -72,7 +72,7 @@ killall_by_name() {
 #
 
 process_list() {
-  ps aux | grep $1 | grep -v 'grep' | grep -v 'kill-list' | awk '{printf "[%s]%s--%s ", $2, $1, $12}'
+  ps aux | grep $1 | grep -v 'kill-list' | awk '{system("lsof -p " $2 "| grep cwd ")}' | awk '{printf "#%s||%s=>%s ", $2, $9, $1}'
 }
 
 #
@@ -80,7 +80,7 @@ process_list() {
 #
 
 pid_list() {
-    ps aux | grep $1 | grep -v 'grep' | grep -v 'kill-list' | awk '{print $2}'
+    ps aux | grep $1 | grep -v 'kill-list' | awk '{print $2}'
 }
 
 
@@ -99,7 +99,7 @@ display_process_with_selected() {
   fi
 
   if test ${#processList[@]} -eq 0; then
-    printf "No process with with name %s...\n" $1
+    printf "No process with name %s...\n" $1
     printf "Bye!\n"
   fi
 
@@ -108,9 +108,9 @@ display_process_with_selected() {
   log "Porcesses" "${#processList[@]}"
   for process in ${!processList[@]}; do
     if test $process -eq $menuPosition; then
-      printf "  \e[0;32mo <$process>\033[0m ${processList[$process]}\033[0m\n"
+      printf "  \e[0;32mo [$process]\033[0m ${processList[$process]}\033[0m\n"
     else
-      printf "    <$process>\033[90m ${processList[$process]}\033[0m\n"
+      printf "    [$process]\033[90m ${processList[$process]}\033[0m\n"
     fi
   done
 
@@ -130,7 +130,7 @@ display_process_with_selected() {
 }
 
 #
-# Do the list item action
+# Perform the list item action
 #
 
 activate_list_item() {
