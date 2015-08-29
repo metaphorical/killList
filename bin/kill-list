@@ -115,7 +115,7 @@ display_process_with_selected() {
   done
 
   if test $menuPosition -eq $killPos; then
-    printf "   \e[0;32m Kill all\033[0m\n"
+    printf "   \e[101m Kill all\033[0m\n"
   else
     printf "   \033[90m Kill all\033[0m\n"
   fi
