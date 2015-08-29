@@ -14,3 +14,6 @@ It gives you a list of processes to kill.
 ##Installation
 
 Install globally with npm.
+```
+npm install -g kill-list
+```

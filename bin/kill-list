@@ -106,6 +106,7 @@ display_process_with_selected() {
   echo
   log "KillList" "$1"
   log "Porcesses" "${#processList[@]}"
+  printf "\e[4m Pick process to kill:\e[0m\n"
   for process in ${!processList[@]}; do
     if test $process -eq $menuPosition; then
       printf "  \e[0;32mo [$process]\033[0m ${processList[$process]}\033[0m\n"
