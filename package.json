@@ -1,7 +1,7 @@
 {
   "name": "kill-list",
   "description": "list processes of given name and pick ones to kill",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Rastko <rastko.vukasinovic@gmail.com>",
   "homepage": "https://github.com/metaphorical/killList",
   "bugs": "https://github.com/metaphorical/killList/issues",
