@@ -2,7 +2,6 @@
 
 UP=$'\033[A'
 DOWN=$'\033[B'
-PARENT_COMMAND="$(ps -o comm= $PPID)"
 
 
 #
@@ -21,12 +20,12 @@ abort() {
 
 
 fullscreen_on() {
-  tput smcup
+  #tput smcup
   stty -echo
 }
 
 fullscreen_off() {
-  tput rmcup
+  #tput rmcup
   stty echo
 }
 
@@ -59,7 +58,7 @@ show_cursor() {
 #
 
 killall_by_name() {
-    ps aux | grep $1 | awk '{print $2}' |
+    ps aux | grep $1 | grep -v 'kill-list' | grep -v 'grep' | awk '{print $2}' |
     while read pid
      do
       echo Killing $pid
@@ -80,7 +79,7 @@ process_list() {
 #
 
 pid_list() {
-    ps aux | grep $1 | grep -v 'kill-list' | awk '{print $2}'
+    ps aux | grep $1 | grep -v 'kill-list' | grep -v 'grep' | awk '{print $2}'
 }
 
 
@@ -98,36 +97,41 @@ display_process_with_selected() {
     menuPosition=$2
   fi
 
-  if test ${#processList[@]} -eq 0; then
+  if test ${#processList[0]} -eq 0; then
     printf "No process with name %s...\n" $1
     printf "Bye!\n"
-  fi
+    fullscreen_off
+    exit 1
+  else
 
-  echo
-  log "KillList" "$1"
-  log "Porcesses" "${#processList[@]}"
-  printf "\e[4m Pick process to kill:\e[0m\n"
-  for process in ${!processList[@]}; do
-    if test $process -eq $menuPosition; then
-      printf "  \e[0;32mo [$process]\033[0m ${processList[$process]}\033[0m\n"
+    echo
+    log "KillList" "$1"
+    #printf "${#processList[0]}"
+    log "Porcesses" "${#processList[@]}"
+    printf "\e[4m Pick process to kill:\e[0m\n"
+    for process in ${!processList[@]}; do
+      if test $process -eq $menuPosition; then
+        printf "  \e[0;32mo [$process]\033[0m ${processList[$process]}\033[0m\n"
+      else
+        printf "    [$process]\033[90m ${processList[$process]}\033[0m\n"
+      fi
+    done
+
+    if test $menuPosition -eq $killPos; then
+      printf "   \e[101m Kill all\033[0m\n"
     else
-      printf "    [$process]\033[90m ${processList[$process]}\033[0m\n"
+      printf "   \033[90m Kill all\033[0m\n"
     fi
-  done
 
-  if test $menuPosition -eq $killPos; then
-    printf "   \e[101m Kill all\033[0m\n"
-  else
-    printf "   \033[90m Kill all\033[0m\n"
+    if test $menuPosition -eq $exitPos; then
+      printf "   \e[0;32m exit\033[0m\n"
+    else
+      printf "   \033[90m exit\033[0m\n"
+    fi
+
+    echo
+  
   fi
-
-  if test $menuPosition -eq $exitPos; then
-    printf "   \e[0;32m exit\033[0m\n"
-  else
-    printf "   \033[90m exit\033[0m\n"
-  fi
-
-  echo
 }
 
 #
@@ -136,11 +140,13 @@ display_process_with_selected() {
 
 activate_list_item() {
     clear
+    local pidList=($(pid_list $2))
+    local processList=($(process_list $2))
     if test $1 -eq $killPos; then
         printf "Killing all %s processes\n" $2
         killall_by_name $2
     elif test $1 -eq $exitPos; then
-        printf "Bye!"
+        printf "Bye!\n"
     else
         printf "Killing: %s\n" ${processList[$1]}
         kill -9 ${pidList[$1]}
